@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prototipo Mi Cita</title>
+<style>
+:root{--stagebg:#DDE3E8;--stagefg:#2C3640;
+  --ink:#1B1B1F; --muted:#46515C; --primary:#0B4F6C; --surface:#F2F6F8; --ok:#1B5E20;
+  --warn:#9C1C14; --hl:#FFF3C4; --line:#5F6B76; --bg:#FFFFFF; --fs:1;
+}
+*{box-sizing:border-box}
+html{font-size:calc(112.5% * var(--fs))}
+body{margin:0;font-family:Inter,Roboto,Arial,sans-serif;color:var(--ink);background:var(--stagebg);line-height:1.35;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.cap{max-width:360px;margin:0 auto 12px;font-size:14px;color:var(--stagefg)}
+.cap b{display:block;font-size:16px}
+.stage{display:flex;justify-content:center}
+.phone{width:360px;max-width:100%;height:760px;background:var(--bg);border-radius:28px;border:2px solid #20262B;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 6px 24px rgba(0,0,0,.2)}
+.screen{display:none;flex:1;flex-direction:column;min-height:0}
+.screen.on{display:flex}
+.body{flex:1;overflow-y:auto;padding:16px}
+.top{background:var(--ok);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;min-height:44px}
+.top .seal{width:22px;height:22px;border-radius:50%;background:#fff;color:var(--ok);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex:none}
+.top .menu{margin-left:auto;display:none;width:44px;height:44px;border:2px solid #fff;border-radius:8px;align-items:center;justify-content:center;font-size:1.2rem}
+h1{font-size:1.6rem;line-height:1.2;margin:8px 0 12px}
+h2{font-size:1.2rem;margin:16px 0 8px}
+p{margin:0 0 12px;font-size:1rem}
+.muted{color:var(--muted)}
+.btn{display:flex;align-items:center;justify-content:center;text-align:center;width:100%;min-height:64px;padding:12px 16px;border-radius:14px;font:inherit;font-size:1.15rem;font-weight:700;border:3px solid var(--primary);background:var(--primary);color:#fff;cursor:pointer;margin-bottom:12px}
+.btn.sec{background:#fff;color:var(--primary)}
+.btn.big{min-height:112px;font-size:1.4rem}
+.btn:focus-visible,.opt:focus-visible,.nav button:focus-visible,.link:focus-visible,.seg button:focus-visible,.back:focus-visible,.tick:focus-visible,input:focus-visible{outline:4px solid #1B1B1F;outline-offset:2px}
+.link{background:none;border:none;color:var(--primary);font:inherit;font-weight:700;text-decoration:underline;min-height:48px;padding:0 4px;cursor:pointer;font-size:1rem}
+.opt{display:block;width:100%;text-align:left;background:#fff;border:3px solid var(--line);border-radius:14px;padding:14px 16px;min-height:76px;margin-bottom:12px;font:inherit;font-size:1.1rem;font-weight:700;color:var(--ink);cursor:pointer}
+.opt small{display:block;font-weight:500;color:var(--muted);font-size:.95rem;margin-top:2px}
+.card{background:var(--surface);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.card b,.hl b{display:block}
+.steps{font-size:.95rem;font-weight:700;color:var(--primary);margin-bottom:4px}
+.back{display:flex;align-items:center;gap:6px;min-height:48px;background:none;border:none;color:var(--primary);font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer;padding:0}
+.nav{display:flex;border-top:2px solid var(--line);background:#fff}
+.nav button{flex:1;min-height:72px;background:#fff;border:none;font:inherit;font-weight:700;font-size:.9rem;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.nav button .ic{width:26px;height:26px;border:3px solid currentColor;border-radius:8px}
+.nav button.on{color:var(--primary);background:var(--surface);box-shadow:inset 0 4px 0 var(--primary)}
+.hl{background:var(--hl);border-radius:14px;padding:12px 16px;margin-bottom:12px;font-size:1rem}
+.seg{display:flex;gap:8px;margin-bottom:12px}
+.seg button{flex:1;min-height:64px;border:3px solid var(--line);background:#fff;border-radius:14px;font:inherit;font-weight:700;color:var(--ink);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--primary);color:#fff;border-color:var(--primary)}
+label{display:block;font-weight:700;margin:8px 0 4px}
+input{width:100%;min-height:56px;border:3px solid var(--line);border-radius:12px;padding:8px 12px;font:inherit;font-size:1.05rem}
+.tick{display:flex;gap:12px;align-items:center;min-height:64px;border:3px solid var(--line);border-radius:14px;padding:8px 14px;margin-bottom:12px;font-weight:700;background:#fff;width:100%;font-size:1rem;color:var(--ink);cursor:pointer;text-align:left;font-family:inherit}
+.tick .box{width:30px;height:30px;border:3px solid var(--line);border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font-weight:800;color:transparent}
+.tick[aria-checked=true] .box{background:var(--ok);border-color:var(--ok);color:#fff}
+.ok{font-size:1.1rem;font-weight:700;color:var(--ok)}
+.toast{display:none}
+h1:focus{outline:none}
+.v1only{display:none}
+.note{font-size:.9rem;color:var(--muted)}
+/* ===== modos de wireframe ===== */
+body.wire{background:#E6E6E6;font-family:Arial,sans-serif}
+body.wire .phone{background:#fff;border-color:#555;border-radius:6px;box-shadow:none}
+body.wire *{color:#222 !important;background-image:none !important;box-shadow:none !important;border-radius:2px !important}
+body.wire .top{background:#CFCFCF !important}
+body.wire .top .seal{background:#fff !important;border:2px solid #666}
+body.wire .btn{background:#BDBDBD !important;border:2px solid #444 !important}
+body.wire .btn.sec{background:#fff !important}
+body.wire .opt,body.wire .tick,body.wire input,body.wire .seg button{border:2px solid #666 !important;background:#fff !important}
+body.wire .seg button[aria-pressed=true]{background:#BDBDBD !important}
+body.wire .card,body.wire .hl{background:#EEE !important;border:1px dashed #888}
+body.wire .nav{border-top:2px solid #666}
+body.wire .nav button{background:#fff !important}
+body.wire .nav button.on{background:#DDD !important}
+body.wire .tick[aria-checked=true] .box{background:#888 !important}
+body.wire h1,body.wire h2{font-weight:700}
+body.wire .link{text-decoration:underline}
+body.v1 .v2only{display:none !important}
+body.v1 .v1only{display:flex !important}
+body.v1 .nav{display:none}
+
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--stagebg:#14191D;--stagefg:#C9D2D9;color-scheme:dark}}
+:root[data-theme="dark"]{--stagebg:#14191D;--stagefg:#C9D2D9;color-scheme:dark}
+</style>
+</head>
+<body>
+
+<div class="cap"><b>Mi Cita (prototipo de la Fase 4)</b>Toque los botones para recorrer el flujo. Todos los datos son de ejemplo.</div>
+<div class="stage"><div class="phone" id="phone">
+
+<!-- INICIO -->
+<section class="screen on" id="s-home" aria-label="Inicio">
+  <div class="top"><span class="seal">✓</span><span>Canal oficial de su EPS (ejemplo)</span><span class="menu v1only" aria-hidden="true">☰</span></div>
+  <div class="body" role="main">
+    <h1>Hola. ¿Qué necesita hoy?</h1>
+    <button class="btn big" data-go="slots">Pedir cita de medicina general</button>
+    <button class="btn sec" data-go="types">Otro tipo de cita</button>
+    <div class="card"><b>Su próxima cita</b><span class="muted" id="nextcita">No tiene citas próximas.</span></div>
+    <h2 class="v2only">Tamaño de la letra</h2>
+    <div class="seg v2only" role="group" aria-label="Tamaño de la letra">
+      <button aria-pressed="true" data-fs="1">Normal</button>
+      <button aria-pressed="false" data-fs="1.2">Grande</button>
+      <button aria-pressed="false" data-fs="1.4">Muy grande</button>
+    </div>
+    <p class="note v2only">Sus datos se usan solo para su cita y no se comparten (texto de ejemplo).</p>
+    <p class="note v2only">¿Necesita ayuda? Toque «Ayuda y letra», abajo a la derecha.</p>
+  </div>
+  <nav class="nav v2only" aria-label="Menú principal">
+    <button class="on" data-go="home" aria-current="page"><span class="ic"></span>Inicio</button>
+    <button data-go="mycitas"><span class="ic"></span>Mis citas</button>
+    <button data-go="help"><span class="ic"></span>Ayuda y letra</button>
+  </nav>
+</section>
+
+<!-- OTRO TIPO -->
+<section class="screen" id="s-types" aria-label="Tipo de cita">
+  <div class="top"><span class="seal">✓</span><span>Canal oficial de su EPS (ejemplo)</span></div>
+  <div class="body" role="main">
+    <button class="back v2only" data-go="home">‹ Atrás</button>
+    <h1>¿Qué cita necesita?</h1>
+    <button class="opt" data-go="slots" data-t="Especialista">Médico especialista</button>
+    <button class="opt" data-go="slots" data-t="Examen">Examen o laboratorio</button>
+    <button class="opt" data-go="slots" data-t="Odontología">Odontología</button>
+  </div>
+  <nav class="nav v2only"><button data-go="home"><span class="ic"></span>Inicio</button><button data-go="mycitas"><span class="ic"></span>Mis citas</button><button data-go="help"><span class="ic"></span>Ayuda y letra</button></nav>
+</section>
+
+<!-- HORARIOS -->
+<section class="screen" id="s-slots" aria-label="Elegir horario">
+  <div class="top"><span class="seal">✓</span><span>Canal oficial de su EPS (ejemplo)</span><span class="menu v1only" aria-hidden="true">☰</span></div>
+  <div class="body" role="main">
+    <button class="back v2only" data-go="home">‹ Atrás</button>
+    <div class="steps v2only">Paso 2 de 3</div>
+    <h1 id="slot-title">Elija el día y la hora</h1>
+    <p class="muted">Cita de <b id="slot-type">medicina general</b>. Horarios de ejemplo.</p>
+    <button class="opt" data-go="confirm" data-slot="Martes 27 de octubre, 8:00 a. m.">Martes 27 de octubre<small>8:00 a. m. · Sede principal (ejemplo)</small></button>
+    <button class="opt" data-go="confirm" data-slot="Miércoles 28 de octubre, 10:30 a. m.">Miércoles 28 de octubre<small>10:30 a. m. · Sede principal (ejemplo)</small></button>
+    <button class="opt" data-go="confirm" data-slot="Jueves 29 de octubre, 2:00 p. m.">Jueves 29 de octubre<small>2:00 p. m. · Sede principal (ejemplo)</small></button>
+    <button class="link" data-go="perm">¿Ver la sede más cercana?</button>
+  </div>
+  <nav class="nav v2only"><button data-go="home"><span class="ic"></span>Inicio</button><button data-go="mycitas"><span class="ic"></span>Mis citas</button><button data-go="help"><span class="ic"></span>Ayuda y letra</button></nav>
+</section>
+
+<!-- CONFIRMAR -->
+<section class="screen" id="s-confirm" aria-label="Confirmar cita">
+  <div class="top"><span class="seal">✓</span><span>Canal oficial de su EPS (ejemplo)</span><span class="menu v1only" aria-hidden="true">☰</span></div>
+  <div class="body" role="main">
+    <button class="back v2only" data-go="slots">‹ Cambiar horario</button>
+    <div class="steps v2only">Paso 3 de 3</div>
+    <h1>Revise y confirme</h1>
+    <div class="card"><b id="c-type">Medicina general</b><span id="c-slot">Martes 27 de octubre, 8:00 a. m.</span><br><span class="muted">Sede principal (ejemplo)</span></div>
+    <button class="tick" role="checkbox" aria-checked="false" id="share"><span class="box" aria-hidden="true">✓</span>Avisar a mi persona de confianza</button>
+    <p class="note v2only">Sus datos se usan solo para su cita y no se comparten (texto de ejemplo).</p>
+    <button class="btn" data-go="done">Confirmar cita</button>
+    <button class="btn sec v2only" data-go="home">Cancelar y volver al inicio</button>
+  </div>
+  <nav class="nav v2only"><button data-go="home"><span class="ic"></span>Inicio</button><button data-go="mycitas"><span class="ic"></span>Mis citas</button><button data-go="help"><span class="ic"></span>Ayuda y letra</button></nav>
+</section>
+
+<!-- LISTO -->
+<section class="screen" id="s-done" aria-label="Cita confirmada">
+  <div class="top"><span class="seal">✓</span><span>Canal oficial de su EPS (ejemplo)</span></div>
+  <div class="body" role="main">
+    <h1>Su cita quedó confirmada</h1>
+    <div class="hl"><b id="d-type">Medicina general</b><span id="d-slot"></span><br>Sede principal (ejemplo)</div>
+    <p class="ok" id="d-share" style="display:none">✓ Se avisó a su persona de confianza.</p>
+    <button class="btn" data-go="home">Volver al inicio</button>
+    <button class="btn sec" data-go="cancel">Cancelar esta cita</button>
+    <p class="note">Si cancela, se le pedirá confirmar antes de borrar la cita.</p>
+  </div>
+  <nav class="nav v2only"><button data-go="home"><span class="ic"></span>Inicio</button><button data-go="mycitas"><span class="ic"></span>Mis citas</button><button data-go="help"><span class="ic"></span>Ayuda y letra</button></nav>
+</section>
+
+<!-- CANCELAR (confirmación) -->
+<section class="screen" id="s-cancel" aria-label="Cancelar cita">
+  <div class="top"><span class="seal">✓</span><span>Canal oficial de su EPS (ejemplo)</span></div>
+  <div class="body" role="main">
+    <h1>¿Quiere cancelar la cita?</h1>
+    <div class="hl">Si cancela, tendrá que pedir otra cita.</div>
+    <button class="btn" data-go="done">No, conservar mi cita</button>
+    <button class="btn sec" data-go="cancelled">Sí, cancelar la cita</button>
+  </div>
+</section>
+
+<section class="screen" id="s-cancelled" aria-label="Cita cancelada">
+  <div class="top"><span class="seal">✓</span><span>Canal oficial de su EPS (ejemplo)</span></div>
+  <div class="body" role="main">
+    <h1>La cita fue cancelada</h1>
+    <button class="btn" data-go="slots">Pedir otra cita</button>
+    <button class="btn sec" data-go="home">Volver al inicio</button>
+  </div>
+  <nav class="nav v2only"><button data-go="home"><span class="ic"></span>Inicio</button><button data-go="mycitas"><span class="ic"></span>Mis citas</button><button data-go="help"><span class="ic"></span>Ayuda y letra</button></nav>
+</section>
+
+<!-- MIS CITAS -->
+<section class="screen" id="s-mycitas" aria-label="Mis citas">
+  <div class="top"><span class="seal">✓</span><span>Canal oficial de su EPS (ejemplo)</span></div>
+  <div class="body" role="main">
+    <h1>Mis citas</h1>
+    <div class="card" id="mc-card"><span class="muted">Todavía no tiene citas pedidas aquí.</span></div>
+    <button class="btn" data-go="slots">Pedir cita de medicina general</button>
+  </div>
+  <nav class="nav v2only"><button data-go="home"><span class="ic"></span>Inicio</button><button class="on" data-go="mycitas" aria-current="page"><span class="ic"></span>Mis citas</button><button data-go="help"><span class="ic"></span>Ayuda y letra</button></nav>
+</section>
+
+<!-- AYUDA Y LETRA -->
+<section class="screen" id="s-help" aria-label="Ayuda y accesibilidad">
+  <div class="top"><span class="seal">✓</span><span>Canal oficial de su EPS (ejemplo)</span><span class="menu v1only" aria-hidden="true">☰</span></div>
+  <div class="body" role="main">
+    <h1>Ayuda y letra</h1>
+    <h2>Tamaño de la letra</h2>
+    <div class="seg" role="group" aria-label="Tamaño de la letra">
+      <button aria-pressed="true" data-fs="1">Normal</button>
+      <button aria-pressed="false" data-fs="1.2">Grande</button>
+      <button aria-pressed="false" data-fs="1.4">Muy grande</button>
+    </div>
+    <h2>¿Necesita hablar con alguien?</h2>
+    <button class="btn sec" data-go="callme">Que me llamen a mi celular</button>
+    <button class="btn sec" data-go="call">Llamar a mi EPS</button>
+    <h2>Mi persona de confianza</h2>
+    <label for="pc">Nombre</label><input id="pc" placeholder="Ejemplo: mi hija" autocomplete="off">
+    <label for="pt">Celular</label><input id="pt" inputmode="tel" placeholder="Ejemplo: 300 000 0000" autocomplete="off">
+    <p></p>
+    <button class="link" data-go="perm">¿Por qué pide permisos esta aplicación?</button>
+  </div>
+  <nav class="nav v2only"><button data-go="home"><span class="ic"></span>Inicio</button><button data-go="mycitas"><span class="ic"></span>Mis citas</button><button class="on" data-go="help" aria-current="page"><span class="ic"></span>Ayuda y letra</button></nav>
+</section>
+
+<section class="screen" id="s-callme" aria-label="Llamada de vuelta">
+  <div class="top"><span class="seal">✓</span><span>Canal oficial de su EPS (ejemplo)</span></div>
+  <div class="body" role="main">
+    <button class="back" data-go="help">‹ Atrás</button>
+    <h1>Le llamaremos a su celular</h1>
+    <div class="hl">Una persona de su EPS le llamará para ayudarle a pedir la cita. No tendrá que marcar opciones. (Servicio de ejemplo.)</div>
+    <button class="btn" data-go="home">Entendido</button>
+  </div>
+</section>
+
+<section class="screen" id="s-call" aria-label="Llamar a la EPS">
+  <div class="top"><span class="seal">✓</span><span>Canal oficial de su EPS (ejemplo)</span></div>
+  <div class="body" role="main">
+    <button class="back" data-go="help">‹ Atrás</button>
+    <h1>Llamar a su EPS</h1>
+    <div class="hl">Aquí se mostraría el teléfono oficial de su EPS, con un botón para marcar. (Ejemplo.)</div>
+    <button class="btn" data-go="help">Volver a Ayuda</button>
+  </div>
+</section>
+
+<!-- PERMISOS -->
+<section class="screen" id="s-perm" aria-label="Por qué pedimos permisos">
+  <div class="top"><span class="seal">✓</span><span>Canal oficial de su EPS (ejemplo)</span></div>
+  <div class="body" role="main">
+    <button class="back v2only" data-go="slots">‹ Atrás</button>
+    <h1>¿Para qué usamos su ubicación?</h1>
+    <div class="hl"><b>Solo para mostrarle la sede más cercana.</b>Puede usar la aplicación sin activarla; entonces usted elige la sede.</div>
+    <button class="btn" data-go="slots">Permitir ubicación</button>
+    <button class="btn sec" data-go="slots">Ahora no, elegiré yo la sede</button>
+  </div>
+</section>
+
+</div></div>
+
+<script>
+(function(){
+  document.documentElement.setAttribute('lang','es');
+  var st={type:"medicina general",slot:"Martes 27 de octubre, 8:00 a. m.",share:false,cita:null};
+  function show(id){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.toggle('on',s.id==='s-'+id)});
+    var b=document.querySelector('#s-'+id+' .body'); if(b) b.scrollTop=0;
+    var hh=document.querySelector('#s-'+id+' h1'); if(hh){hh.setAttribute('tabindex','-1'); try{hh.focus({preventScroll:true})}catch(e){}}
+    if(id==='slots'){document.getElementById('slot-type').textContent=st.type}
+    if(id==='confirm'){document.getElementById('c-type').textContent=cap(st.type);document.getElementById('c-slot').textContent=st.slot}
+    if(id==='done'){st.cita={type:st.type,slot:st.slot};
+      document.getElementById('d-type').textContent=cap(st.type);document.getElementById('d-slot').textContent=st.slot;
+      document.getElementById('d-share').style.display=st.share?'block':'none';
+      document.getElementById('nextcita').textContent=cap(st.type)+', '+st.slot;
+      document.getElementById('mc-card').innerHTML='<b>'+cap(st.type)+'</b>'+st.slot+'<br><span class="muted">Sede principal (ejemplo)</span>';}
+    if(id==='cancelled'){st.cita=null;document.getElementById('nextcita').textContent='No tiene citas próximas.';
+      document.getElementById('mc-card').innerHTML='<span class="muted">Todavía no tiene citas pedidas aquí.</span>'}
+  }
+  function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+  document.addEventListener('click',function(e){
+    var el=e.target.closest('[data-go]'); 
+    if(el){ if(el.dataset.t) st.type=el.dataset.t.toLowerCase(); else if(el.dataset.go==='slots' && el.closest('#s-home,#s-mycitas,#s-cancelled')) st.type='medicina general';
+            if(el.dataset.slot) st.slot=el.dataset.slot; show(el.dataset.go); return;}
+    var fs=e.target.closest('[data-fs]');
+    if(fs){document.documentElement.style.setProperty('--fs',fs.dataset.fs);
+      document.querySelectorAll('[data-fs]').forEach(function(b){b.setAttribute('aria-pressed',b===fs)});return;}
+    var sh=e.target.closest('#share');
+    if(sh){st.share=!st.share;sh.setAttribute('aria-checked',st.share);}
+  });
+  window.__show=show;
+  var q=location.search; if(/wire1/.test(q)){document.body.classList.add('wire','v1')} else if(/wire2/.test(q)){document.body.classList.add('wire')}
+  var h=location.hash.replace('#',''); if(h&&document.getElementById('s-'+h)) show(h);
+})();
+</script>
+
+<script>
+(function(){
+  var st={type:"medicina general",slot:"Martes 27 de octubre, 8:00 a. m.",share:false,cita:null};
+  function show(id){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.toggle('on',s.id==='s-'+id)});
+    var b=document.querySelector('#s-'+id+' .body'); if(b) b.scrollTop=0;
+    var hh=document.querySelector('#s-'+id+' h1'); if(hh){hh.setAttribute('tabindex','-1'); try{hh.focus({preventScroll:true})}catch(e){}}
+    if(id==='slots'){document.getElementById('slot-type').textContent=st.type}
+    if(id==='confirm'){document.getElementById('c-type').textContent=cap(st.type);document.getElementById('c-slot').textContent=st.slot}
+    if(id==='done'){st.cita={type:st.type,slot:st.slot};
+      document.getElementById('d-type').textContent=cap(st.type);document.getElementById('d-slot').textContent=st.slot;
+      document.getElementById('d-share').style.display=st.share?'block':'none';
+      document.getElementById('nextcita').textContent=cap(st.type)+', '+st.slot;
+      document.getElementById('mc-card').innerHTML='<b>'+cap(st.type)+'</b>'+st.slot+'<br><span class="muted">Sede principal (ejemplo)</span>';}
+    if(id==='cancelled'){st.cita=null;document.getElementById('nextcita').textContent='No tiene citas próximas.';
+      document.getElementById('mc-card').innerHTML='<span class="muted">Todavía no tiene citas pedidas aquí.</span>'}
+    
+  }
+  function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+  document.addEventListener('click',function(e){
+    var el=e.target.closest('[data-go]'); 
+    if(el){ if(el.dataset.t) st.type=el.dataset.t.toLowerCase(); else if(el.dataset.go==='slots' && el.closest('#s-home,#s-mycitas,#s-cancelled')) st.type='medicina general';
+            if(el.dataset.slot) st.slot=el.dataset.slot; show(el.dataset.go); return;}
+    var fs=e.target.closest('[data-fs]');
+    if(fs){document.documentElement.style.setProperty('--fs',fs.dataset.fs);
+      document.querySelectorAll('[data-fs]').forEach(function(b){b.setAttribute('aria-pressed',b===fs)});return;}
+    var sh=e.target.closest('#share');
+    if(sh){st.share=!st.share;sh.setAttribute('aria-checked',st.share);}
+  });
+  window.__show=show;
+  var q=location.search; if(/wire1/.test(q)){document.body.classList.add('wire','v1')} else if(/wire2/.test(q)){document.body.classList.add('wire')}
+  var h=location.hash.replace('#',''); if(h&&document.getElementById('s-'+h)) show(h);
+})();
+</script>
+</body>
+</html>
